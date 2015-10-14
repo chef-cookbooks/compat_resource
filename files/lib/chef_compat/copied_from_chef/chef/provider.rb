@@ -28,13 +28,21 @@ super if defined?(::Chef::Provider)
         specified_properties = properties.select { |property| new_resource.property_is_set?(property) }
         modified = specified_properties.select { |p| new_resource.send(p) != current_resource.send(p) }
         if modified.empty?
-          Chef::Log.debug("Skipping update of #{new_resource.to_s}: has not changed any of the specified properties #{specified_properties.map { |p| "#{p}=#{new_resource.send(p).inspect}" }.join(", ")}.")
+          if @sensitive == true
+            Chef::Log.debug("Skipping update of #{new_resource.to_s}: has not changed any of the specified properties (suppressed sensitive properties).")
+          else
+            Chef::Log.debug("Skipping update of #{new_resource.to_s}: has not changed any of the specified properties #{specified_properties.map { |p| "#{p}=#{new_resource.send(p).inspect}" }.join(", ")}.")
+          end
           return false
         end
 
         # Print the pretty green text and run the block
         property_size = modified.map { |p| p.size }.max
-        modified = modified.map { |p| "  set #{p.to_s.ljust(property_size)} to #{new_resource.send(p).inspect} (was #{current_resource.send(p).inspect})" }
+        if @sensitive == true
+          modified = modified.map { |p| "  set #{p.to_s.ljust(property_size)} to (suppressed sensitive properties)"}
+        else
+          modified = modified.map { |p| "  set #{p.to_s.ljust(property_size)} to #{new_resource.send(p).inspect} (was #{current_resource.send(p).inspect})" }
+        end
         converge_by([ "update #{current_resource.identity}" ] + modified, &converge_block)
 
       else
@@ -43,10 +51,11 @@ super if defined?(::Chef::Provider)
         property_size = properties.map { |p| p.size }.max
         created = []
         properties.each do |property|
-          if new_resource.property_is_set?(property)
-            created << "  set #{property.to_s.ljust(property_size)} to #{new_resource.send(property).inspect}"
+          default = ' (default value)' unless new_resource.property_is_set?(property)
+          if @sensitive == true
+            created << "  set #{property.to_s.ljust(property_size)} to (suppressed sensitive properties)" + default ||= ''
           else
-            created << "  set #{property.to_s.ljust(property_size)} to #{new_resource.send(property).inspect} (default value)"
+            created << "  set #{property.to_s.ljust(property_size)} to #{new_resource.send(property).inspect}" + default ||= ''
           end
         end
 
