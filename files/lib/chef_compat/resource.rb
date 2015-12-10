@@ -19,6 +19,16 @@ module ChefCompat
       provider(arg)
     end
 
+    # This doesn't exist in all versions and we'd prefer not to just steal run_action entirely
+    def run_action(action, *args, &block)
+      old_currently_running_action = @currently_running_action
+      @currently_running_action = action
+      super
+    ensure
+      @currently_running_action = old_currently_running_action
+    end
+    attr_reader :currently_running_action
+
     if !respond_to?(:resource_name)
       def self.resource_name(name=Chef::NOT_PASSED)
         # Setter

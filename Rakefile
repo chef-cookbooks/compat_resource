@@ -15,6 +15,7 @@ task default: :spec
 #
 CHEF_FILES = %w(
                 chef/constants
+                chef/log
                 chef/delayed_evaluator
                 chef/dsl/declare_resource
                 chef/dsl/recipe
@@ -66,6 +67,9 @@ KEEP_FUNCTIONS = {
     self.include_resource_dsl_module
   ),
   'chef/dsl/recipe' => %w(),
+  'chef/log' => %w(
+    caller_location
+  )
 }
 KEEP_INCLUDES = {
   'chef/resource' => %w(Chef::Mixin::ParamsValidate Chef::Mixin::Properties),
