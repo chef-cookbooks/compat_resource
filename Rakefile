@@ -14,27 +14,27 @@ task default: :spec
 # "rake update" updates the copied_from_chef files so we can grab bugfixes or new features
 #
 CHEF_FILES = %w(
-                chef/constants
-                chef/delayed_evaluator
-                chef/dsl/declare_resource
-                chef/dsl/recipe
-                chef/mixin/params_validate
-                chef/mixin/properties
-                chef/property
-                chef/provider
-                chef/resource
-                chef/resource_builder
-                chef/resource/action_class
-              )
+  chef/constants
+  chef/delayed_evaluator
+  chef/dsl/declare_resource
+  chef/dsl/recipe
+  chef/mixin/params_validate
+  chef/mixin/properties
+  chef/property
+  chef/provider
+  chef/resource
+  chef/resource_builder
+  chef/resource/action_class
+).freeze
 SPEC_FILES = %w(
-                unit/mixin/properties_spec.rb
-                unit/property_spec.rb
-                unit/property/state_spec.rb
-                unit/property/validation_spec.rb
-                integration/recipes/resource_action_spec.rb
-                integration/recipes/resource_converge_if_changed_spec.rb
-                integration/recipes/resource_load_spec.rb
-             )
+  unit/mixin/properties_spec.rb
+  unit/property_spec.rb
+  unit/property/state_spec.rb
+  unit/property/validation_spec.rb
+  integration/recipes/resource_action_spec.rb
+  integration/recipes/resource_converge_if_changed_spec.rb
+  integration/recipes/resource_load_spec.rb
+).freeze
 KEEP_FUNCTIONS = {
   'chef/resource' => %w(
     initialize
@@ -65,35 +65,35 @@ KEEP_FUNCTIONS = {
     self.include_resource_dsl
     self.include_resource_dsl_module
   ),
-  'chef/dsl/recipe' => %w(),
-}
+  'chef/dsl/recipe' => %w()
+}.freeze
 KEEP_INCLUDES = {
   'chef/resource' => %w(Chef::Mixin::ParamsValidate Chef::Mixin::Properties),
   'chef/provider' => %w(Chef::DSL::Recipe::FullDSL),
-  'chef/dsl/recipe' => %w(Chef::DSL::DeclareResource Chef::DSL::Recipe),
-}
+  'chef/dsl/recipe' => %w(Chef::DSL::DeclareResource Chef::DSL::Recipe)
+}.freeze
 KEEP_CLASSES = {
   'chef/provider' => %w(Chef::Provider Chef::Provider::InlineResources Chef::Provider::InlineResources::ClassMethods)
-}
+}.freeze
 SKIP_LINES = {
-  'chef/dsl/recipe' => [ /include Chef::Mixin::PowershellOut/ ]
-}
+  'chef/dsl/recipe' => [/include Chef::Mixin::PowershellOut/]
+}.freeze
 PROCESS_LINES = {
-}
+}.freeze
 # See chef_compat/resource for def. of resource_name and provider
 # See chef_compat/monkeypatches/chef/resource for def. of current_value
 
 task :update do
   # Copy files from chef to chef_compat/chef, with a few changes
-  target_path = File.expand_path("../files/lib/chef_compat/copied_from_chef", __FILE__)
+  target_path = File.expand_path('../files/lib/chef_compat/copied_from_chef', __FILE__)
   chef_gem_path = Bundler.environment.specs['chef'].first.full_gem_path
   CHEF_FILES.each do |file|
     output = StringIO.new
     # Wrap the whole thing in a ChefCompat module
     output.puts "require 'chef_compat/copied_from_chef'"
-    output.puts "class Chef"
-    output.puts "module ::ChefCompat"
-    output.puts "module CopiedFromChef"
+    output.puts 'class Chef'
+    output.puts 'module ::ChefCompat'
+    output.puts 'module CopiedFromChef'
 
     # Bring over the Chef file
     chef_contents = IO.read(File.join(chef_gem_path, 'lib', "#{file}.rb"))
@@ -117,13 +117,13 @@ task :update do
 
         # Skip modules and classes that aren't part of our list
         when /\A(\s*)def\s+([A-Za-z0-9_.]+)/
-          if KEEP_FUNCTIONS[file] && !KEEP_FUNCTIONS[file].include?($2)
-            skip_until = /\A#{$1}end\s*$/
+          if KEEP_FUNCTIONS[file] && !KEEP_FUNCTIONS[file].include?(Regexp.last_match(2))
+            skip_until = /\A#{Regexp.last_match(1)}end\s*$/
             next
           else
-            function = $2
+            function = Regexp.last_match(2)
             # Keep everything inside a function no matter what it is
-            keep_until = /\A#{$1}end\s*$/
+            keep_until = /\A#{Regexp.last_match(1)}end\s*$/
           end
 
         # Skip comments and whitespace if we're narrowing the file (otherwise it
@@ -133,11 +133,11 @@ task :update do
 
         # Skip aliases/attrs/properties that we're not keeping
         when /\A\s*(attr_reader|attr_writer|attr_accessor|property|alias)\s*:(\w+)/
-          next if KEEP_FUNCTIONS[file] && !KEEP_FUNCTIONS[file].include?($2)
+          next if KEEP_FUNCTIONS[file] && !KEEP_FUNCTIONS[file].include?(Regexp.last_match(2))
 
         # Skip includes and extends that we're not keeping
         when /\A\s*(include|extend)\s*([A-Za-z0-9_:]+)/
-          next if KEEP_INCLUDES[file] && !KEEP_INCLUDES[file].include?($2)
+          next if KEEP_INCLUDES[file] && !KEEP_INCLUDES[file].include?(Regexp.last_match(2))
 
         end
 
@@ -152,10 +152,15 @@ task :update do
 
       # Detect class open
       elsif line =~ /\A(\s*)(class|module)(\s+)([A-Za-z0-9_:]+)(\s*<\s*([A-Za-z0-9_:]+))?.*$/
-        indent, type, space, class_name, _, superclass_name = $1, $2, $3, $4, $5, $6
+        indent = Regexp.last_match(1)
+        type = Regexp.last_match(2)
+        space = Regexp.last_match(3)
+        class_name = Regexp.last_match(4)
+        _ = Regexp.last_match(5)
+        superclass_name = Regexp.last_match(6)
         full_class_name = in_class[-1] ? "#{in_class[-1][:name]}::#{class_name}" : class_name
         in_class << { name: full_class_name, until: /\A#{indent}end\s*$/ }
-        superclass_name ||= "Object"
+        superclass_name ||= 'Object'
 
         # Don't print the class open unless it contains stuff we'll keep
         next if KEEP_CLASSES[file] && !KEEP_CLASSES[file].any? { |c| c.start_with?(full_class_name) }
@@ -176,8 +181,8 @@ task :update do
 
       # Modify requires to overridden files to bring in the local version
       if line =~ /\A(\s*require\s*['"])([^'"]+)(['"].*)/
-        if CHEF_FILES.include?($2)
-          line = "#{$1}chef_compat/copied_from_chef/#{$2}#{$3}"
+        if CHEF_FILES.include?(Regexp.last_match(2))
+          line = "#{Regexp.last_match(1)}chef_compat/copied_from_chef/#{Regexp.last_match(2)}#{Regexp.last_match(3)}"
         else
           next
         end
@@ -193,17 +198,16 @@ task :update do
       end
     end
     # Close the ChefCompat module declaration from the top
-    output.puts "end"
-    output.puts "end"
-    output.puts "end"
+    output.puts 'end'
+    output.puts 'end'
+    output.puts 'end'
 
     # Write out the file in chef_compat
     target_file = File.join(target_path, "#{file}.rb")
-    if !File.exist?(target_file) || IO.read(target_file) != output.string
-      puts "Writing #{target_file} ..."
-      FileUtils.mkdir_p(File.dirname(target_file))
-      File.open(target_file, "w") { |f| f.write(output.string) }
-    end
+    next unless !File.exist?(target_file) || IO.read(target_file) != output.string
+    puts "Writing #{target_file} ..."
+    FileUtils.mkdir_p(File.dirname(target_file))
+    File.open(target_file, 'w') { |f| f.write(output.string) }
   end
 
   # SPEC_FILES.each do |file|

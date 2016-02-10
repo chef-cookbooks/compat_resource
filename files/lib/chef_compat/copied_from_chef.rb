@@ -7,6 +7,7 @@ module ChefCompat
         def self.method_missing(name, *args, &block)
           @chef_module.send(name, *args, &block)
         end
+
         def self.const_missing(name)
           @chef_module.const_get(name)
         end
@@ -20,7 +21,8 @@ module ChefCompat
         module ActionClass
           def self.use_inline_resources
           end
-          def self.include_resource_dsl(include_resource_dsl)
+
+          def self.include_resource_dsl(_include_resource_dsl)
           end
         end
       end

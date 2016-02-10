@@ -2,7 +2,7 @@ require 'chef/provider'
 require 'chef/provider/lwrp_base'
 
 class Chef::Provider
-  if !defined?(InlineResources)
+  unless defined?(InlineResources)
     InlineResources = Chef::Provider::LWRPBase::InlineResources
   end
   module InlineResources

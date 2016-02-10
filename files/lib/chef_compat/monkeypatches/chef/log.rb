@@ -10,7 +10,7 @@ module ChefCompat
           Gem.loaded_specs['chef'].require_paths.map { |p| File.join(Gem.loaded_specs['chef'].full_gem_path, p) } +
           Gem.loaded_specs['compat_resource'].require_paths.map { |p| File.join(Gem.loaded_specs['compat_resource'].full_gem_path, p) }
 
-        caller.select { |c| !@compat_resource_filter_paths.any? { |path| c.start_with?(path) } }.first
+        caller.find { |c| !@compat_resource_filter_paths.any? { |path| c.start_with?(path) } }
       end
     end
   end

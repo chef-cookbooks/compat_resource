@@ -22,15 +22,16 @@ module ChefCompat
     def provider(*args, &block)
       super || self.class.action_class
     end
+
     def provider=(arg)
       provider(arg)
     end
 
-    if !respond_to?(:resource_name)
-      def self.resource_name(name=Chef::NOT_PASSED)
+    unless respond_to?(:resource_name)
+      def self.resource_name(name = Chef::NOT_PASSED)
         # Setter
         if name != Chef::NOT_PASSED
-  #        remove_canonical_dsl
+          #        remove_canonical_dsl
 
           # Set the resource_name and call provides
           if name
@@ -39,7 +40,7 @@ module ChefCompat
             # Commented out: use of resource_name and provides will need to be
             # mutually exclusive in this world, generally.
             # if !Chef::ResourceResolver.includes_handler?(name, self)
-              provides name#, canonical: true
+            provides name # , canonical: true
             # end
             @resource_name = name
           else
@@ -48,6 +49,7 @@ module ChefCompat
         end
         @resource_name
       end
+
       def self.resource_name=(name)
         resource_name(name)
       end
