@@ -1,6 +1,6 @@
 # Make sure and emit a property that triggers deprecation
 property :n, name_property: true, default: 5
-property :x, String, coerce: proc { |x| x.to_s }, default: lazy { y*y }
+property :x, String, coerce: proc { |x| x.to_s }, default: lazy { y * y }
 property :y, Integer, default: 4
 
 class ::Globals
@@ -8,6 +8,7 @@ class ::Globals
   def self.exists
     @@exists
   end
+
   def self.exists=(value)
     @@exists = value
   end
@@ -16,6 +17,7 @@ class ::Globals
   def self.global_x
     @@global_x
   end
+
   def self.global_x=(value)
     @@global_x = value
   end
@@ -24,13 +26,14 @@ class ::Globals
   def self.global_y
     @@global_y
   end
+
   def self.global_y=(value)
     @@global_y = value
   end
 end
 
 load_current_value do
-  current_value_does_not_exist! if !Globals.exists
+  current_value_does_not_exist! unless Globals.exists
 
   x Globals.global_x
   y Globals.global_y

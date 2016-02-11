@@ -1,4 +1,4 @@
 actions :create
 default_action :create
 
-attribute :x, kind_of: [ String ], name_attribute: true
+attribute :x, kind_of: [String], name_attribute: true
