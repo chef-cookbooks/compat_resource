@@ -20,8 +20,13 @@ module CopiedFromChef
 # limitations under the License.
 #
 
-# NOTE: this was extracted from the Recipe DSL mixin, relevant specs are in spec/unit/recipe_spec.rb
+begin
+  Thread.exclusive do
+    require "chef/resource_builder" unless defined?(::Chef::ResourceBuilder)
+  end
+rescue LoadError; end
 
+# NOTE: this was extracted from the Recipe DSL mixin, relevant specs are in spec/unit/recipe_spec.rb
 class Chef < (defined?(::Chef) ? ::Chef : Object)
   class ResourceBuilder < (defined?(::Chef::ResourceBuilder) ? ::Chef::ResourceBuilder : Object)
     attr_reader :type
@@ -36,7 +41,7 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
 
     # FIXME (ruby-2.1 syntax): most of these are mandatory
     def initialize(type:nil, name:nil, created_at: nil, params: nil, run_context: nil, cookbook_name: nil, recipe_name: nil, enclosing_provider: nil)
-super if defined?(::Chef::ResourceBuilder)
+      super if defined?(::Chef::ResourceBuilder)
       @type               = type
       @name               = name
       @created_at         = created_at
