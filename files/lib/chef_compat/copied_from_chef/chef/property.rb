@@ -1,10 +1,14 @@
+begin
+  require 'chef/property'
+rescue LoadError; end
+
 require 'chef_compat/copied_from_chef'
 class Chef
 module ::ChefCompat
 module CopiedFromChef
 #
 # Author:: John Keiser <jkeiser@chef.io>
-# Copyright:: Copyright (c) 2015 John Keiser.
+# Copyright:: Copyright 2015-2016, John Keiser.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -89,11 +93,10 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
     #
     def initialize(**options)
 super if defined?(::Chef::Property)
-      options.each { |k,v| options[k.to_sym] = v; options.delete(k) if k.is_a?(String) }
+      options.each { |k, v| options[k.to_sym] = v; options.delete(k) if k.is_a?(String) }
       @options = options
       options[:name] = options[:name].to_sym if options[:name]
       options[:instance_variable_name] = options[:instance_variable_name].to_sym if options[:instance_variable_name]
-
 
       # Replace name_attribute with name_property
       if options.has_key?(:name_attribute)
@@ -102,7 +105,7 @@ super if defined?(::Chef::Property)
           raise ArgumentError, "Cannot specify both name_property and name_attribute together on property #{self}."
         end
         # replace name_property with name_attribute in place
-        options = Hash[options.map { |k,v| k == :name_attribute ? [ :name_property, v ] : [ k,v ] }]
+        options = Hash[options.map { |k, v| k == :name_attribute ? [ :name_property, v ] : [ k, v ] }]
         @options = options
       end
 
@@ -131,7 +134,7 @@ super if defined?(::Chef::Property)
     end
 
     def to_s
-      "#{name}#{declared_in ? " of resource #{declared_in.resource_name}" : ""}"
+      "#{name || "<property type>"}#{declared_in ? " of resource #{declared_in.resource_name}" : ""}"
     end
 
     #
@@ -235,8 +238,8 @@ super if defined?(::Chef::Property)
     # @return [Hash<Symbol,Object>]
     #
     def validation_options
-      @validation_options ||= options.reject { |k,v|
-        [:declared_in,:name,:instance_variable_name,:desired_state,:identity,:default,:name_property,:coerce,:required].include?(k)
+      @validation_options ||= options.reject { |k, v|
+        [:declared_in, :name, :instance_variable_name, :desired_state, :identity, :default, :name_property, :coerce, :required].include?(k)
       }
     end
 
@@ -260,7 +263,7 @@ super if defined?(::Chef::Property)
     #   will be returned without running, validating or coercing. If it is a
     #   `get`, the non-lazy, coerced, validated value will always be returned.
     #
-    def call(resource, value=NOT_PASSED)
+    def call(resource, value = NOT_PASSED)
       if value == NOT_PASSED
         return get(resource)
       end
@@ -344,7 +347,7 @@ super if defined?(::Chef::Property)
            resource.enclosing_provider &&
            resource.enclosing_provider.new_resource &&
            resource.enclosing_provider.new_resource.respond_to?(name)
-           Chef::Log.warn("#{Chef::Log.caller_location}: property #{name} is declared in both #{resource} and #{resource.enclosing_provider}. Use new_resource.#{name} instead. At #{Chef::Log.caller_location}")
+          Chef::Log.warn("#{Chef::Log.caller_location}: property #{name} is declared in both #{resource} and #{resource.enclosing_provider}. Use new_resource.#{name} instead. At #{Chef::Log.caller_location}")
         end
 
         if has_default?
@@ -465,7 +468,12 @@ super if defined?(::Chef::Property)
     def validate(resource, value)
       # If we have no default value, `nil` is never coerced or validated
       unless value.nil? && !has_default?
-        (resource || Chef::Mixin::ParamsValidate).validate({ name => value }, { name => validation_options })
+        if resource
+          resource.validate({ name => value }, { name => validation_options })
+        else
+          name = self.name || :property_type
+          Chef::Mixin::ParamsValidate.validate({ name => value }, { name => validation_options })
+        end
       end
     end
 
@@ -486,7 +494,7 @@ super if defined?(::Chef::Property)
       if modified_options.has_key?(:name_property) ||
          modified_options.has_key?(:name_attribute) ||
          modified_options.has_key?(:default)
-        options = options.reject { |k,v| k == :name_attribute || k == :name_property || k == :default }
+        options = options.reject { |k, v| k == :name_attribute || k == :name_property || k == :default }
       end
       self.class.new(options.merge(modified_options))
     end
@@ -503,7 +511,7 @@ super if defined?(::Chef::Property)
 
       # We prefer this form because the property name won't show up in the
       # stack trace if you use `define_method`.
-      declared_in.class_eval <<-EOM, __FILE__, __LINE__+1
+      declared_in.class_eval <<-EOM, __FILE__, __LINE__ + 1
         def #{name}(value=NOT_PASSED)
           raise "Property #{name} of \#{self} cannot be passed a block! If you meant to create a resource named #{name} instead, you'll need to first rename the property." if block_given?
           self.class.properties[#{name.inspect}].call(self, value)
@@ -515,7 +523,7 @@ super if defined?(::Chef::Property)
       EOM
     rescue SyntaxError
       # If the name is not a valid ruby name, we use define_method.
-      declared_in.define_method(name) do |value=NOT_PASSED, &block|
+      declared_in.define_method(name) do |value = NOT_PASSED, &block|
         raise "Property #{name} of #{self} cannot be passed a block! If you meant to create a resource named #{name} instead, you'll need to first rename the property." if block
         self.class.properties[name].call(self, value)
       end
@@ -574,7 +582,7 @@ super if defined?(::Chef::Property)
     # @api private
     def explicitly_accepts_nil?(resource)
       options.has_key?(:coerce) ||
-      (options.has_key?(:is) && resource.send(:_pv_is, { name => nil }, name, options[:is], raise_error: false))
+        (options.has_key?(:is) && resource.send(:_pv_is, { name => nil }, name, options[:is], raise_error: false))
     end
 
     def get_value(resource)

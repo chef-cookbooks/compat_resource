@@ -1,10 +1,14 @@
+begin
+  require 'chef/mixin/params_validate'
+rescue LoadError; end
+
 require 'chef_compat/copied_from_chef'
 class Chef
 module ::ChefCompat
 module CopiedFromChef
 #
-# Author:: Adam Jacob (<adam@opscode.com>)
-# Copyright:: Copyright (c) 2008 Opscode, Inc.
+# Author:: Adam Jacob (<adam@chef.io>)
+# Copyright:: Copyright 2008-2016, Chef Software Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -146,7 +150,7 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
       end
 
       # Raise an exception if the parameter is not found.
-      def _pv_required(opts, key, is_required=true, explicitly_allows_nil=false)
+      def _pv_required(opts, key, is_required = true, explicitly_allows_nil = false)
         if is_required
           return true if opts.has_key?(key.to_s) && (explicitly_allows_nil || !opts[key.to_s].nil?)
           return true if opts.has_key?(key.to_sym) && (explicitly_allows_nil || !opts[key.to_sym].nil?)
@@ -335,7 +339,7 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
       #    property :x, name_property: true
       #   ```
       #
-      def _pv_name_property(opts, key, is_name_property=true)
+      def _pv_name_property(opts, key, is_name_property = true)
         if is_name_property
           if opts[key].nil?
             raise CannotValidateStaticallyError, "name_property cannot be evaluated without a resource." if self == Chef::Mixin::ParamsValidate
@@ -406,23 +410,34 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
         return true if !opts.has_key?(key.to_s) && !opts.has_key?(key.to_sym)
         value = _pv_opts_lookup(opts, key)
         to_be = [ to_be ].flatten(1)
-        to_be.each do |tb|
+        errors = []
+        passed = to_be.any? do |tb|
           case tb
           when Proc
             raise CannotValidateStaticallyError, "is: proc { } must be evaluated once for each resource" if self == Chef::Mixin::ParamsValidate
-            return true if instance_exec(value, &tb)
+            instance_exec(value, &tb)
           when Property
-            validate(opts, { key => tb.validation_options })
-            return true
+            begin
+              validate(opts, { key => tb.validation_options })
+              true
+            rescue Exceptions::ValidationFailed
+              # re-raise immediately if there is only one "is" so we get a better stack
+              raise if to_be.size == 1
+              errors << $!
+              false
+            end
           else
-            return true if tb === value
+            tb === value
           end
         end
-
-        if raise_error
-          raise Exceptions::ValidationFailed, "Option #{key} must be one of: #{to_be.join(", ")}!  You passed #{value.inspect}."
+        if passed
+          true
         else
-          false
+          message = "Property #{key} must be one of: #{to_be.map { |v| v.inspect }.join(", ")}!  You passed #{value.inspect}."
+          unless errors.empty?
+            message << " Errors:\n#{errors.map { |m| "- #{m}" }.join("\n")}"
+          end
+          raise Exceptions::ValidationFailed, message
         end
       end
 
@@ -457,7 +472,6 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
       # (which is the norm).
       extend self
 
-
       # Used by #set_or_return to avoid emitting a deprecation warning for
       # "value nil" and to keep default stickiness working exactly the same
       # @api private
@@ -471,7 +485,7 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
           value
         end
 
-        def call(resource, value=NOT_PASSED)
+        def call(resource, value = NOT_PASSED)
           # setting to nil does a get
           if value.nil? && !explicitly_accepts_nil?(resource)
             get(resource)

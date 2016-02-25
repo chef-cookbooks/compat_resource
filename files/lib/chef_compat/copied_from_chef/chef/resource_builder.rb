@@ -1,10 +1,14 @@
+begin
+  require 'chef/resource_builder'
+rescue LoadError; end
+
 require 'chef_compat/copied_from_chef'
 class Chef
 module ::ChefCompat
 module CopiedFromChef
 #
 # Author:: Lamont Granquist (<lamont@chef.io>)
-# Copyright:: Copyright (c) 2015-2015 Chef Software, Inc.
+# Copyright:: Copyright 2015-2016, Chef Software, Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

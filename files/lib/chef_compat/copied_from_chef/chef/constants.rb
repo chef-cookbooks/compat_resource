@@ -1,10 +1,14 @@
+begin
+  require 'chef/constants'
+rescue LoadError; end
+
 require 'chef_compat/copied_from_chef'
 class Chef
 module ::ChefCompat
 module CopiedFromChef
 #
 # Author:: John Keiser <jkeiser@chef.io>
-# Copyright:: Copyright (c) 2015 Opscode, Inc.
+# Copyright:: Copyright 2015-2016, Chef Software Inc.
 # License:: Apache License, Version 2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +28,7 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
   def NOT_PASSED.to_s
     "NOT_PASSED"
   end
+
   def NOT_PASSED.inspect
     to_s
   end
