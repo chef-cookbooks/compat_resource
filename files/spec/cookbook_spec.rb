@@ -60,6 +60,10 @@ describe "compat_resource cookbook" do
 #     -   set x to "16" \(default value\)
 #     -   set y to 4 \(default value\)
 # /)
+
+    if Chef::VERSION.to_f >= 12.1
+      # expect(result.stdout).to match /ResourceBuilder superclass: Chef::ResourceBuilder/
+    end
   end
   if Chef::VERSION.to_f <= 12.5
     it "when chef-client tries to declare_resource with extra parameters, it fails" do

@@ -75,6 +75,9 @@ KEEP_INCLUDES = {
 KEEP_CLASSES = {
   'chef/provider' => %w(Chef::Provider Chef::Provider::InlineResources Chef::Provider::InlineResources::ClassMethods)
 }
+KEEP_REQUIRES = {
+  'chef/dsl/declare_resource' => %w(chef/resource_builder)
+}
 SKIP_LINES = {
   'chef/dsl/recipe' => [ /include Chef::Mixin::PowershellOut/ ]
 }
@@ -180,9 +183,16 @@ task :update do
       end
 
       # Modify requires to overridden files to bring in the local version
-      if line =~ /\A(\s*require\s*['"])([^'"]+)(['"].*)/
-        if CHEF_FILES.include?($2)
-          line = "#{$1}chef_compat/copied_from_chef/#{$2}#{$3}"
+      if line =~ /\A(\s*)(require\s*['"])([^'"]+)(['"].*)/
+        if CHEF_FILES.include?($3)
+          if KEEP_REQUIRES[file] && KEEP_REQUIRES[file].include?($3)
+            output.puts "#{$1}begin"
+            output.puts "#{$1}  #{$2}#{$3}#{$4}"
+            output.puts "#{$1}rescue LoadError"
+            output.puts "#{$1}end"
+          end
+
+          line = "#{$1}#{$2}chef_compat/copied_from_chef/#{$3}#{$4}"
         else
           next
         end
