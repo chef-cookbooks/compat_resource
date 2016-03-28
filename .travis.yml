@@ -5,12 +5,14 @@ cache: bundler
 before_install:
   - bundle --version
   - gem --version
+  - gem update --system
+  - gem install bundler
 
 script:
   - bundle install --jobs=3 --retry=3
   - bundle exec rake spec
 
-env: "GEMFILE_MOD=\"gem 'chef', '~> 12.5'\""
+env: "GEMFILE_MOD=\"gem 'chef', '~> 12.8'\""
 
 # The set of Rubies Chef works with
 rvm:
@@ -23,6 +25,12 @@ rvm:
 matrix:
   include:
     - env: "GEMFILE_MOD=\"gem 'chef', github: 'chef/chef'\""
+      rvm: 2.0
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.7.0'\""
+      rvm: 2.0
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.6.0'\""
+      rvm: 2.0
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.5.0'\""
       rvm: 2.0
     - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.4.0'\""
       rvm: 2.0

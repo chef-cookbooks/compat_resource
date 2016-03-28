@@ -97,9 +97,7 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
       #
       def build_resource(type, name, created_at = nil, run_context: self.run_context, &resource_attrs_block)
         created_at ||= caller[0]
-        Thread.exclusive do
-          require "chef_compat/copied_from_chef/chef/resource_builder" unless defined?(Chef::ResourceBuilder)
-        end
+        require "chef_compat/copied_from_chef/chef/resource_builder" unless defined?(Chef::ResourceBuilder)
 
         Chef::ResourceBuilder.new(
           type:                type,
@@ -109,7 +107,7 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
           run_context:         run_context,
           cookbook_name:       cookbook_name,
           recipe_name:         recipe_name,
-          enclosing_provider:  self.is_a?(Chef::Provider) ? self : nil,
+          enclosing_provider:  self.is_a?(Chef::Provider) ? self : nil
         ).build(&resource_attrs_block)
       end
     end
