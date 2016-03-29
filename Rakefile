@@ -89,6 +89,11 @@ task :update do
   chef_gem_path = Bundler.environment.specs['chef'].first.full_gem_path
   CHEF_FILES.each do |file|
     output = StringIO.new
+    # First lets try to load the original file if it exists
+    output.puts "begin"
+    output.puts "  require '#{file}'"
+    output.puts "rescue LoadError; end"
+    output.puts ""
     # Wrap the whole thing in a ChefCompat module
     output.puts "require 'chef_compat/copied_from_chef'"
     output.puts "class Chef"
