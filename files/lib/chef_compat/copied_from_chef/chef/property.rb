@@ -77,6 +77,9 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
     #     property defaults to the same value as `name`. Equivalent to
     #     `default: lazy { name }`, except that #property_is_set? will
     #     return `true` if the property is set *or* if `name` is set.
+    #   @option options [Boolean] :nillable `true` opt-in to Chef-13 style behavior where
+    #     attempting to set a nil value will really set a nil value instead of issuing
+    #     a warning and operating like a getter
     #   @option options [Object] :default The value this property
     #     will return if the user does not set one. If this is `lazy`, it will
     #     be run in the context of the instance (and able to access other
@@ -239,7 +242,7 @@ super if defined?(::Chef::Property)
     #
     def validation_options
       @validation_options ||= options.reject { |k, v|
-        [:declared_in, :name, :instance_variable_name, :desired_state, :identity, :default, :name_property, :coerce, :required].include?(k)
+        [:declared_in, :name, :instance_variable_name, :desired_state, :identity, :default, :name_property, :coerce, :required, :nillable].include?(k)
       }
     end
 
@@ -268,7 +271,7 @@ super if defined?(::Chef::Property)
         return get(resource)
       end
 
-      if value.nil?
+      if value.nil? && !nillable?
         # In Chef 12, value(nil) does a *get* instead of a set, so we
         # warn if the value would have been changed. In Chef 13, it will be
         # equivalent to value = nil.
@@ -675,6 +678,10 @@ super if defined?(::Chef::Property)
       end
 
       result
+    end
+
+    def nillable?
+      !!options[:nillable]
     end
   end
 end
