@@ -37,6 +37,11 @@ class Chef
     # Determine the appropriate provider for the given resource, then
     # execute it.
     def run_action(resource, action, notification_type = nil, notifying_resource = nil)
+      before_notifications = run_context.before_notifications(resource) || []
+      unless before_notifications.empty?
+        Chef::Log.warn("The cookbook compat_resource has patched the chef_runner to enable the enhanced notifications from chef 12.10. Your :before-notification for #{resource} will not be executed")
+      end
+
       # Actually run the action for realsies
       resource.run_action(action, notification_type, notifying_resource)
 
