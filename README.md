@@ -64,6 +64,8 @@ To use this cookbook, put `depends 'compat_resource'` in the metadata.rb of your
 
 For example, if you create resources/myresource.rb, myresource can use `property`, `load_current_value` and `action` (no need to create a provider). If you want to create Resource classes directly, extend from `ChefCompat::Resource` instead of `Chef::Resource`. Properties, current value loading, converge_if_changed, and resource_name will all function the same across versions.
 
+NB: This cookbook does not do anything on recent (>= 12.5) chef versions.
+
 ## Custom Resources?
 
 Curious about how to use custom resources? Here are the 12.5 docs:

@@ -21,6 +21,8 @@ describe "compat_resource cookbook" do
                  File.join(cookbooks_path, 'notifications'))
     File.symlink(File.expand_path('../data/cookbooks/cloning', __FILE__),
                  File.join(cookbooks_path, 'cloning'))
+    File.symlink(File.expand_path('../data/cookbooks/empty', __FILE__),
+                 File.join(cookbooks_path, 'empty'))
   end
 
   require 'chef/mixin/shell_out'
@@ -39,49 +41,58 @@ describe "compat_resource cookbook" do
     end
   end
 
-  it "should handle new-style recursive notifications" do
-    result = run_chef("-o notifications")
-    puts result.stdout
-    puts result.stderr
-  end
+  recent_chef = Gem::Requirement.new(">= 12.5").satisfied_by?(Gem::Version.new(Chef::VERSION))
 
-  it "should not clone resources from the outer run context" do
-    result = run_chef("-o future::declare_resource,cloning::default")
-    expect(result.stdout).not_to match(/3694/)
-  end
+  unless recent_chef
+    it "should handle new-style recursive notifications" do
+      result = run_chef("-o notifications")
+      puts result.stdout
+      puts result.stderr
+    end
 
-  it "when chef-client runs the test recipe, it succeeds" do
-    result = run_chef("-o test::test,test")
-    puts result.stdout
-    puts result.stderr
-#     expect(result.stdout).to match(/
-# Recipe: test::test
-#   \* future_resource\[sets neither x nor y\] action create \(up to date\)
-#   \* future_resource\[sets both x and y\] action create
-#     - update sets both x and y
-#     -   set x to "hi" \(was "initial_x"\)
-#     -   set y to 10 \(was 2\)
-#   \* future_resource\[sets neither x nor y explicitly\] action create \(up to date\)
-#   \* future_resource\[sets only y\] action create
-#     - update sets only y
-#     -   set y to 20 (was 10)
-#   \* future_resource\[deletes resource\] action delete \(up to date\)
-#   \* future_resource\[sets x and y via creation\] action create
-#     - create sets x and y via creation
-#     -   set x to "hi"
-#     -   set y to 20
-#   \* future_resource\[deletes resource again\] action delete \(up to date\)
-#   \* future_resource\[sets x and y to their defaults via creation\] action create
-#     - create sets x and y to their defaults via creation
-#     -   set x to "16" \(default value\)
-#     -   set y to 4 \(default value\)
-# /)
-  end
-  if Gem::Requirement.new("< 12.6").satisfied_by?(Gem::Version.new(Chef::VERSION))
-    it "when chef-client tries to declare_resource with extra parameters, it fails" do
-      expect {
-        run_chef("-o normal::declare_resource")
-      }.to raise_error(Mixlib::ShellOut::ShellCommandFailed)
+    it "should not clone resources from the outer run context" do
+      result = run_chef("-o future::declare_resource,cloning::default")
+      expect(result.stdout).not_to match(/3694/)
+    end
+
+    it "when chef-client runs the test recipe, it succeeds" do
+      result = run_chef("-o test::test,test")
+      puts result.stdout
+      puts result.stderr
+      #     expect(result.stdout).to match(/
+      # Recipe: test::test
+      #   \* future_resource\[sets neither x nor y\] action create \(up to date\)
+      #   \* future_resource\[sets both x and y\] action create
+      #     - update sets both x and y
+      #     -   set x to "hi" \(was "initial_x"\)
+      #     -   set y to 10 \(was 2\)
+      #   \* future_resource\[sets neither x nor y explicitly\] action create \(up to date\)
+      #   \* future_resource\[sets only y\] action create
+      #     - update sets only y
+      #     -   set y to 20 (was 10)
+      #   \* future_resource\[deletes resource\] action delete \(up to date\)
+      #   \* future_resource\[sets x and y via creation\] action create
+      #     - create sets x and y via creation
+      #     -   set x to "hi"
+      #     -   set y to 20
+      #   \* future_resource\[deletes resource again\] action delete \(up to date\)
+      #   \* future_resource\[sets x and y to their defaults via creation\] action create
+      #     - create sets x and y to their defaults via creation
+      #     -   set x to "16" \(default value\)
+      #     -   set y to 4 \(default value\)
+      # /)
+    end
+    if Gem::Requirement.new("< 12.6").satisfied_by?(Gem::Version.new(Chef::VERSION))
+      it "when chef-client tries to declare_resource with extra parameters, it fails" do
+        expect {
+          run_chef("-o normal::declare_resource")
+        }.to raise_error(Mixlib::ShellOut::ShellCommandFailed)
+      end
     end
   end
+
+  it "should #{recent_chef ? 'not' : ''} patch any chef class" do
+    expect { run_chef("-o empty") }.not_to raise_error
+  end
+
 end
