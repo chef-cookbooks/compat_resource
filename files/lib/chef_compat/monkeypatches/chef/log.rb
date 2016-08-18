@@ -19,3 +19,16 @@ end
 class<<::Chef::Log
   prepend ChefCompat::Monkeypatches::Log
 end
+
+class Chef
+  class Log
+    unless method_defined?(:deprecation)
+      module ChefCompatDeprecation
+        def deprecation(message, location=nil)
+          Chef.log_deprecation(message, location)
+        end
+      end
+      extend ChefCompatDeprecation
+    end
+  end
+end

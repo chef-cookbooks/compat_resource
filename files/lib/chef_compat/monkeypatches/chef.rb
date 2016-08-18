@@ -10,7 +10,7 @@ class Chef
         chef_gem_path = File.expand_path("../..",::Chef::Resource.instance_method(:initialize).source_location[0])
         caller(0..10).each do |c|
           if !c.start_with?(chef_gem_path) && !c.start_with?(chef_compat_gem_path)
-            new_location = c
+            location = c
             break
           end
         end
@@ -18,8 +18,8 @@ class Chef
 
       begin
         super
-      # Bleagh. `super_method` doesn't exist on older rubies and I haven't
-      # figured out a way to check for its existence otherwise.
+        # Bleagh. `super_method` doesn't exist on older rubies and I haven't
+        # figured out a way to check for its existence otherwise.
       rescue NoMethodError
         Chef::Log.warn(message)
       end
@@ -29,4 +29,5 @@ class Chef
   class<<self
     prepend ChefCompatDeprecation
   end
+
 end

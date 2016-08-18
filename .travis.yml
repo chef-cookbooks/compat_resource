@@ -12,11 +12,10 @@ script:
   - bundle install --jobs=3 --retry=3
   - bundle exec rake spec
 
-env: "GEMFILE_MOD=\"gem 'chef', '~> 12.8'\""
+env: "GEMFILE_MOD=\"gem 'chef', '~> 12.12'\""
 
 # The set of Rubies Chef works with
 rvm:
-  - 2.0
   - 2.1
   - 2.2
 
@@ -25,22 +24,30 @@ rvm:
 matrix:
   include:
     - env: "GEMFILE_MOD=\"gem 'chef', github: 'chef/chef'\""
+      rvm: 2.1
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.11.0'\""
+      rvm: 2.1
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.10.0'\""
+      rvm: 2.1
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.9.0'\""
+      rvm: 2.1
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.8.0'\""
+      rvm: 2.1
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.7.0'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
       rvm: 2.0
-    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.7.0'\""
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.6.0'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
       rvm: 2.0
-    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.6.0'\""
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.5.0'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
       rvm: 2.0
-    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.5.0'\""
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.4.0'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
       rvm: 2.0
-    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.4.0'\""
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.3.0'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
       rvm: 2.0
-    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.3.0'\""
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.2.0'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
       rvm: 2.0
-    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.2.0'\""
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.1.0'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
       rvm: 2.0
-    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.1.0'\""
-      rvm: 2.0
-    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.0.3'\""
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.0.3'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
       rvm: 2.0
 
 notifications:
@@ -48,3 +55,7 @@ notifications:
     on_failure: always
     on_success: change
     secure: W2QBW06FQcKP8F6VrVJZjhJDZkz46meV0Zuj/AHcexYbGvB9zWE8Vb/U5h7YW5CS1U2y0hKwl1VgdOmLf+SWDZLFLZ5hYcc44VJqQl5XZlaOw4OCeUvp4aluzTl9n4qRh1DTPrvb37iZbA2uMcLlyhiv1jVS8NnNaqqh9Uy/A5A=
+
+branches:
+  only:
+  - master

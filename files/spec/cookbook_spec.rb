@@ -17,11 +17,18 @@ describe "compat_resource cookbook" do
                  File.join(cookbooks_path, 'normal'))
     File.symlink(File.expand_path('../data/cookbooks/hybrid', __FILE__),
                  File.join(cookbooks_path, 'hybrid'))
+    File.symlink(File.expand_path('../data/cookbooks/notifications', __FILE__),
+                 File.join(cookbooks_path, 'notifications'))
+    File.symlink(File.expand_path('../data/cookbooks/before', __FILE__),
+                 File.join(cookbooks_path, 'before'))
+    File.symlink(File.expand_path('../data/cookbooks/cloning', __FILE__),
+                 File.join(cookbooks_path, 'cloning'))
   end
 
   require 'chef/mixin/shell_out'
   include Chef::Mixin::ShellOut
   before :all do
+    FileUtils.rm_f(File.expand_path('../data/Gemfile.lock', __FILE__))
     Bundler.with_clean_env do
       shell_out!("bundle install --gemfile #{File.expand_path('../data/Gemfile', __FILE__)}")
     end
@@ -32,6 +39,22 @@ describe "compat_resource cookbook" do
       shell_out!("bundle exec chef-client -c #{File.join(chef_repo_path, 'config.rb')} -F doc #{args}",
                  environment: { 'BUNDLE_GEMFILE' => File.expand_path('../data/Gemfile', __FILE__) })
     end
+  end
+
+  it "should work with before notifications" do
+    result = run_chef("-o before")
+    expect(result.stdout).to match(/.*INFO: log\[the notify\] running why-run write action to support before action.*INFO: the notify.*INFO: before.*INFO: the notify.*/m)
+  end
+
+  it "should handle new-style recursive notifications" do
+    result = run_chef("-o notifications")
+    puts result.stdout
+    puts result.stderr
+  end
+
+  it "should not clone resources from the outer run context" do
+    result = run_chef("-o future::declare_resource,cloning::default")
+    expect(result.stdout).not_to match(/3694/)
   end
 
   it "when chef-client runs the test recipe, it succeeds" do
@@ -61,7 +84,7 @@ describe "compat_resource cookbook" do
 #     -   set y to 4 \(default value\)
 # /)
   end
-  if Chef::VERSION.to_f <= 12.5
+  if Gem::Requirement.new("< 12.6").satisfied_by?(Gem::Version.new(Chef::VERSION))
     it "when chef-client tries to declare_resource with extra parameters, it fails" do
       expect {
         run_chef("-o normal::declare_resource")

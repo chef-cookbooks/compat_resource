@@ -1,5 +1,5 @@
 if defined?(CompatResource::GEMSPEC)
-  raise "Already loaded ChefCompat from #{CompatResource::GEMSPEC.require_path}/compat_resource/gemspec.rb. Cannot load a second time from #{__FILE__}"
+  raise "Already loaded CompatResource from #{CompatResource::GEMSPEC.require_path}/compat_resource/gemspec.rb. Cannot load a second time from #{__FILE__}"
 end
 
 require_relative 'version'
@@ -21,7 +21,6 @@ module CompatResource
     s.add_development_dependency 'rake'
     s.add_development_dependency 'rspec'
     s.add_development_dependency 'cheffish'
-    s.add_development_dependency 'stove'
     s.add_development_dependency 'chef'
 
     s.bindir       = "files/bin"
