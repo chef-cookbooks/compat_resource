@@ -47,7 +47,7 @@ class Chef < (defined?(::Chef) ? ::Chef : Object)
     attr_reader :resource
 
     # FIXME (ruby-2.1 syntax): most of these are mandatory
-    def initialize(type:nil, name:nil, created_at: nil, params: nil, run_context: nil, cookbook_name: nil, recipe_name: nil, enclosing_provider: nil)
+    def initialize(type: nil, name: nil, created_at: nil, params: nil, run_context: nil, cookbook_name: nil, recipe_name: nil, enclosing_provider: nil)
 super if defined?(::Chef::ResourceBuilder)
       @type               = type
       @name               = name

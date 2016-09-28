@@ -1,11 +1,12 @@
-require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
 require 'stove/rake_task'
+require_relative 'tasks/maintainers'
 require 'fileutils'
 
 RSpec::Core::RakeTask.new(:spec) do |t|
-  t.pattern = FileList['files/spec/**/*_spec.rb']
+  t.pattern = FileList['spec/**/*_spec.rb']
 end
+
 Stove::RakeTask.new
 
 task default: :spec
@@ -37,20 +38,13 @@ CHEF_FILES = %w(
                 chef/provider/apt_update
                 chef/provider/apt_repository
                 chef/provider/noop
+                chef/provider/yum_repository
                 chef/resource
                 chef/resource/action_class
                 chef/resource/apt_update
                 chef/resource/apt_repository
+                chef/resource/yum_repository
                 chef/resource_builder
-)
-SPEC_FILES = %w(
-                unit/mixin/properties_spec.rb
-                unit/property_spec.rb
-                unit/property/state_spec.rb
-                unit/property/validation_spec.rb
-                integration/recipes/resource_action_spec.rb
-                integration/recipes/resource_converge_if_changed_spec.rb
-                integration/recipes/resource_load_spec.rb
 )
 KEEP_FUNCTIONS = {
   'chef/resource' => %w(
@@ -268,9 +262,12 @@ task :update do
     end
   end
 
-  # SPEC_FILES.each do |file|
-  #   target_path = File.expand_path("../files/spec/copied_from_chef", __FILE__)
-  #   source_file = File.join(chef_gem_path, 'lib', "#{file}.rb")
-  #   target_file = File.join(target_path, "#{file}")
-  # end
+  # spit out the version somewhere we can easily slurp it up from
+  File.open(File.expand_path("files/lib/chef_upstream_version.rb", File.dirname(__FILE__)), "w") do |f|
+    f.write <<-EOF
+        module ChefCompat
+          CHEF_UPSTREAM_VERSION="#{chef_gemspec.version}"
+        end
+    EOF
+  end
 end
