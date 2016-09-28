@@ -1,6 +1,23 @@
+class Chef
+  class RunContext
+    class ChildRunContext < RunContext
+      # magic that lets us re-parse the ChildRunContext without erroring due to
+      # cheffish and chef-provisioning hooks having been loaded (on old versions of
+      # chef-client without the lazy hooks for those gems)
+      @__skip_method_checking = true
+    end
+  end
+end
+
+# fix to quiet constant redefined warnings
+if defined?(Chef::RunContext::ChildRunContext::CHILD_STATE)
+  Chef::RunContext::ChildRunContext.send(:remove_const, :CHILD_STATE)
+end
+
 require 'chef_compat/monkeypatches/chef'
 require 'chef_compat/monkeypatches/chef/exceptions'
 require 'chef_compat/monkeypatches/chef/log'
+require 'chef_compat/monkeypatches/chef/node'
 require 'chef_compat/monkeypatches/chef/mixin/params_validate'
 require 'chef_compat/monkeypatches/chef/property'
 require 'chef_compat/monkeypatches/chef/provider'

@@ -7,7 +7,7 @@ describe "compat_resource cookbook" do
   before do
     File.symlink(File.expand_path('../data/config.rb', __FILE__),
                  File.join(chef_repo_path, 'config.rb'))
-    File.symlink(File.expand_path('../../..', __FILE__),
+    File.symlink(File.expand_path('../..', __FILE__),
                  File.join(cookbooks_path, 'compat_resource'))
     File.symlink(File.expand_path('../data/cookbooks/test', __FILE__),
                  File.join(cookbooks_path, 'test'))
@@ -19,10 +19,14 @@ describe "compat_resource cookbook" do
                  File.join(cookbooks_path, 'hybrid'))
     File.symlink(File.expand_path('../data/cookbooks/notifications', __FILE__),
                  File.join(cookbooks_path, 'notifications'))
+    File.symlink(File.expand_path('../data/cookbooks/strange_notifications', __FILE__),
+                 File.join(cookbooks_path, 'strange_notifications'))
     File.symlink(File.expand_path('../data/cookbooks/before', __FILE__),
                  File.join(cookbooks_path, 'before'))
     File.symlink(File.expand_path('../data/cookbooks/cloning', __FILE__),
                  File.join(cookbooks_path, 'cloning'))
+    File.symlink(File.expand_path('../data/cookbooks/unmodified', __FILE__),
+                 File.join(cookbooks_path, 'unmodified'))
   end
 
   require 'chef/mixin/shell_out'
@@ -48,8 +52,24 @@ describe "compat_resource cookbook" do
 
   it "should handle new-style recursive notifications" do
     result = run_chef("-o notifications")
-    puts result.stdout
-    puts result.stderr
+  end
+
+  it "should fix https://github.com/chef-cookbooks/compat_resource/issues/99" do
+    result = run_chef("-o strange_notifications::one")
+    expect(result.stdout).to match(/INFO: Processing log\[it worked\] action write/)
+  end
+
+  it "should fix https://github.com/chef-cookbooks/compat_resource/issues/87" do
+    result = run_chef("-o strange_notifications::two")
+    expect(result.stdout.scan("INFO: Processing log\[two\] action write").size).to eq(1)  # appears once
+  end
+
+  it "should definitely run a bunch of resources if we don't depend on compat_resource" do
+    result = run_chef("-o unmodified")
+  end
+
+  it "should run a bunch of resources in a mixed-run" do
+    result = run_chef("-o unmodified,test")
   end
 
   it "should not clone resources from the outer run context" do
@@ -59,8 +79,6 @@ describe "compat_resource cookbook" do
 
   it "when chef-client runs the test recipe, it succeeds" do
     result = run_chef("-o test::test,test")
-    puts result.stdout
-    puts result.stderr
 #     expect(result.stdout).to match(/
 # Recipe: test::test
 #   \* future_resource\[sets neither x nor y\] action create \(up to date\)

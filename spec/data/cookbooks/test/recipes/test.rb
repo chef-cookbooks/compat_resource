@@ -38,4 +38,4 @@ future_super_resource 'lets you set x and y' do
   y 200
 end
 
-ChefCompat::CopiedFromChef::Chef.log_deprecation "hi there"
+Chef.log_deprecation "hi there"
