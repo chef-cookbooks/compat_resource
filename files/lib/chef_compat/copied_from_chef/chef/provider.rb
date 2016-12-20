@@ -43,7 +43,7 @@ super if defined?(::Chef::Provider)
         specified_properties = properties.select { |property| new_resource.property_is_set?(property) }
         modified = specified_properties.select { |p| new_resource.send(p) != current_resource.send(p) }
         if modified.empty?
-          properties_str = if sensitive
+          properties_str = if new_resource.sensitive
                              specified_properties.join(", ")
                            else
                              specified_properties.map { |p| "#{p}=#{new_resource.send(p).inspect}" }.join(", ")
@@ -55,7 +55,7 @@ super if defined?(::Chef::Provider)
         # Print the pretty green text and run the block
         property_size = modified.map { |p| p.size }.max
         modified.map! do |p|
-          properties_str = if sensitive
+          properties_str = if new_resource.sensitive
                              "(suppressed sensitive property)"
                            else
                              "#{new_resource.send(p).inspect} (was #{current_resource.send(p).inspect})"
@@ -70,7 +70,7 @@ super if defined?(::Chef::Provider)
         property_size = properties.map { |p| p.size }.max
         created = properties.map do |property|
           default = " (default value)" unless new_resource.property_is_set?(property)
-          properties_str = if sensitive
+          properties_str = if new_resource.sensitive
                              "(suppressed sensitive property)"
                            else
                              new_resource.send(property).inspect
