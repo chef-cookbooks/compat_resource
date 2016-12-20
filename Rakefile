@@ -9,7 +9,9 @@ end
 
 Stove::RakeTask.new
 
-task default: :spec
+task default: :ci
+
+task ci: [ :spec, :integration ]
 
 #
 # "rake update" updates the copied_from_chef files so we can grab bugfixes or new features
@@ -284,3 +286,31 @@ task :update do
     EOF
   end
 end
+
+namespace :integration do
+  my_root = File.expand_path(File.dirname(__FILE__))
+
+  task :cleanup do
+    sh "rm -rf test/tmp/cookbooks"
+    sh "mkdir -p test/tmp/cookbooks"
+  end
+
+  desc "Run ssh_known_hosts integration tests"
+  task :ssh_known_hosts => :cleanup do
+    sh "git clone https://github.com/chef-cookbooks/ssh_known_hosts test/tmp/cookbooks/ssh_known_hosts"
+    Dir.chdir "test/tmp/cookbooks/ssh_known_hosts" do
+      File.open("Berksfile", "a") do |f|
+        f.puts "cookbook 'compat_resource', path: '#{my_root}'"
+      end
+      sh "rm -f Berksfile.lock"
+      sh "bundle exec berks install"
+      ENV['KITCHEN_YAML']=".kitchen.docker.yml"
+      sh "bundle exec kitchen test 1604"
+    end
+  end
+
+  task :all => [ :ssh_known_hosts ]
+end
+
+desc "Run all integration tests"
+task :integration => 'integration:all'
