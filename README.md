@@ -9,6 +9,7 @@ This cookbook backports functionality introduced in the latest chef-client relea
 - [Custom Resources](https://docs.chef.io/custom_resources.html)
 - [apt_repository](https://docs.chef.io/resource_apt_repository.html)
 - [apt_update](https://docs.chef.io/resource_apt_update.html)
+- [systemd_unit](https://docs.chef.io/resource_systemd_unit.html)
 - [yum_repository](https://docs.chef.io/resource_yum_repository.html)
 - [:before notifications](https://docs.chef.io/resources.html#timers)
 
@@ -39,12 +40,21 @@ Curious about how to use custom resources?
 
 ## License & Authors
 
-**Author:** John Keiser ([jkeiser@chef.io](mailto:jkeiser@chef.io))
+- Author:: Lamont Granquist ([lamont@chef.io](mailto:lamont@chef.io))
+- Author:: John Keiser ([jkeiser@chef.io](mailto:jkeiser@chef.io))
 
-**Copyright:** 2015-2016, Chef Software, Inc. ``` Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+```text
+Copyright:: 2015-2016 Chef Software, Inc.
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```
-http://www.apache.org/licenses/LICENSE-2.0
-```
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
