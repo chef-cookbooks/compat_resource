@@ -50,7 +50,7 @@ matrix:
       rvm: 2.0
     - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.1.0'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
       rvm: 2.0
-    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.0.3'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'\""
+    - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.0.3'; gem 'chef-zero', '< 4.6'; gem 'ffi-yajl', '< 2.3'; gem 'chef-api', '< 0.7'; gem 'ohai', '< 8.18'; gem 'nokogiri', '< 1.6.8'\""
       rvm: 2.0
     - env: "GEMFILE_MOD=\"gem 'chef', '~> 12.14.0'\""
       rvm: 2.3.1
